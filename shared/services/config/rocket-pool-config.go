@@ -11,8 +11,10 @@ import (
 
 	"github.com/alessio/shellescape"
 	"github.com/pbnjay/memory"
+	"github.com/rocket-pool/smartnode/addons"
 	"github.com/rocket-pool/smartnode/shared"
 	"github.com/rocket-pool/smartnode/shared/services/config/migration"
+	addontypes "github.com/rocket-pool/smartnode/shared/types/addons"
 	"github.com/rocket-pool/smartnode/shared/types/config"
 	"gopkg.in/yaml.v2"
 )
@@ -112,6 +114,9 @@ type RocketPoolConfig struct {
 
 	// Native mode
 	Native *NativeConfig `yaml:"native,omitempty"`
+
+	// Addons
+	GraffitiWallWriter addontypes.SmartnodeAddon
 }
 
 // Load configuration settings from a file
@@ -477,6 +482,9 @@ func NewRocketPoolConfig(rpDir string, isNativeMode bool) *RocketPoolConfig {
 	cfg.BitflyNodeMetrics = NewBitflyNodeMetricsConfig(cfg)
 	cfg.Native = NewNativeConfig(cfg)
 
+	// Addons
+	cfg.GraffitiWallWriter = addons.NewGraffitiWallWriter()
+
 	// Apply the default values for mainnet
 	cfg.Smartnode.Network.Value = cfg.Smartnode.Network.Options[0].Value
 	cfg.applyAllDefaults()
@@ -575,6 +583,7 @@ func (cfg *RocketPoolConfig) GetSubconfigs() map[string]config.Config {
 		"exporter":                  cfg.Exporter,
 		"bitflyNodeMetrics":         cfg.BitflyNodeMetrics,
 		"native":                    cfg.Native,
+		"addons-gww":                cfg.GraffitiWallWriter.GetConfig(),
 	}
 }
 
@@ -865,8 +874,8 @@ func (cfg *RocketPoolConfig) GenerateEnvironmentVariables() map[string]string {
 	// Basic variables and root parameters
 	envVars["SMARTNODE_IMAGE"] = cfg.Smartnode.GetSmartnodeContainerTag()
 	envVars["ROCKETPOOL_FOLDER"] = cfg.RocketPoolDirectory
-	AddParametersToEnvVars(cfg.Smartnode.GetParameters(), envVars)
-	AddParametersToEnvVars(cfg.GetParameters(), envVars)
+	config.AddParametersToEnvVars(cfg.Smartnode.GetParameters(), envVars)
+	config.AddParametersToEnvVars(cfg.GetParameters(), envVars)
 
 	// EC parameters
 	if cfg.ExecutionClientMode.Value.(config.Mode) == config.Mode_Local {
@@ -888,29 +897,29 @@ func (cfg *RocketPoolConfig) GenerateEnvironmentVariables() map[string]string {
 		}
 
 		// Common params
-		AddParametersToEnvVars(cfg.ExecutionCommon.GetParameters(), envVars)
+		config.AddParametersToEnvVars(cfg.ExecutionCommon.GetParameters(), envVars)
 
 		// Client-specific params
 		switch cfg.ExecutionClient.Value.(config.ExecutionClient) {
 		case config.ExecutionClient_Geth:
-			AddParametersToEnvVars(cfg.Geth.GetParameters(), envVars)
+			config.AddParametersToEnvVars(cfg.Geth.GetParameters(), envVars)
 			envVars["EC_STOP_SIGNAL"] = gethStopSignal
 		case config.ExecutionClient_Nethermind:
-			AddParametersToEnvVars(cfg.Nethermind.GetParameters(), envVars)
+			config.AddParametersToEnvVars(cfg.Nethermind.GetParameters(), envVars)
 			envVars["EC_STOP_SIGNAL"] = nethermindStopSignal
 		case config.ExecutionClient_Besu:
-			AddParametersToEnvVars(cfg.Besu.GetParameters(), envVars)
+			config.AddParametersToEnvVars(cfg.Besu.GetParameters(), envVars)
 			envVars["EC_STOP_SIGNAL"] = besuStopSignal
 		case config.ExecutionClient_Infura:
-			AddParametersToEnvVars(cfg.Infura.GetParameters(), envVars)
+			config.AddParametersToEnvVars(cfg.Infura.GetParameters(), envVars)
 			envVars["EC_STOP_SIGNAL"] = powProxyStopSignal
 		case config.ExecutionClient_Pocket:
-			AddParametersToEnvVars(cfg.Pocket.GetParameters(), envVars)
+			config.AddParametersToEnvVars(cfg.Pocket.GetParameters(), envVars)
 			envVars["EC_STOP_SIGNAL"] = powProxyStopSignal
 		}
 	} else {
 		envVars["EC_CLIENT"] = "X" // X is for external / unknown
-		AddParametersToEnvVars(cfg.ExternalExecution.GetParameters(), envVars)
+		config.AddParametersToEnvVars(cfg.ExternalExecution.GetParameters(), envVars)
 	}
 	// Get the hostname of the Execution client, necessary for Prometheus to work in hybrid mode
 	ecUrl, err := url.Parse(envVars["EC_HTTP_ENDPOINT"])
@@ -939,17 +948,17 @@ func (cfg *RocketPoolConfig) GenerateEnvironmentVariables() map[string]string {
 			}
 
 			// Common params
-			AddParametersToEnvVars(cfg.FallbackExecutionCommon.GetParameters(), envVars)
+			config.AddParametersToEnvVars(cfg.FallbackExecutionCommon.GetParameters(), envVars)
 
 			// Client-specific params
 			switch cfg.FallbackExecutionClient.Value.(config.ExecutionClient) {
 			case config.ExecutionClient_Infura:
-				AddParametersToEnvVars(cfg.FallbackInfura.GetParameters(), envVars)
+				config.AddParametersToEnvVars(cfg.FallbackInfura.GetParameters(), envVars)
 			case config.ExecutionClient_Pocket:
-				AddParametersToEnvVars(cfg.FallbackPocket.GetParameters(), envVars)
+				config.AddParametersToEnvVars(cfg.FallbackPocket.GetParameters(), envVars)
 			}
 		} else {
-			AddParametersToEnvVars(cfg.FallbackExternalExecution.GetParameters(), envVars)
+			config.AddParametersToEnvVars(cfg.FallbackExternalExecution.GetParameters(), envVars)
 		}
 	}
 
@@ -971,30 +980,30 @@ func (cfg *RocketPoolConfig) GenerateEnvironmentVariables() map[string]string {
 		envVars["BN_OPEN_PORTS"] = bnOpenPorts
 
 		// Common params
-		AddParametersToEnvVars(cfg.ConsensusCommon.GetParameters(), envVars)
+		config.AddParametersToEnvVars(cfg.ConsensusCommon.GetParameters(), envVars)
 
 		// Client-specific params
 		switch cfg.ConsensusClient.Value.(config.ConsensusClient) {
 		case config.ConsensusClient_Lighthouse:
-			AddParametersToEnvVars(cfg.Lighthouse.GetParameters(), envVars)
+			config.AddParametersToEnvVars(cfg.Lighthouse.GetParameters(), envVars)
 		case config.ConsensusClient_Nimbus:
-			AddParametersToEnvVars(cfg.Nimbus.GetParameters(), envVars)
+			config.AddParametersToEnvVars(cfg.Nimbus.GetParameters(), envVars)
 		case config.ConsensusClient_Prysm:
-			AddParametersToEnvVars(cfg.Prysm.GetParameters(), envVars)
+			config.AddParametersToEnvVars(cfg.Prysm.GetParameters(), envVars)
 			envVars["CC_RPC_ENDPOINT"] = fmt.Sprintf("http://%s:%d", Eth2ContainerName, cfg.Prysm.RpcPort.Value)
 		case config.ConsensusClient_Teku:
-			AddParametersToEnvVars(cfg.Teku.GetParameters(), envVars)
+			config.AddParametersToEnvVars(cfg.Teku.GetParameters(), envVars)
 		}
 	} else {
 		envVars["CC_CLIENT"] = fmt.Sprint(cfg.ExternalConsensusClient.Value)
 
 		switch cfg.ExternalConsensusClient.Value.(config.ConsensusClient) {
 		case config.ConsensusClient_Lighthouse:
-			AddParametersToEnvVars(cfg.ExternalLighthouse.GetParameters(), envVars)
+			config.AddParametersToEnvVars(cfg.ExternalLighthouse.GetParameters(), envVars)
 		case config.ConsensusClient_Prysm:
-			AddParametersToEnvVars(cfg.ExternalPrysm.GetParameters(), envVars)
+			config.AddParametersToEnvVars(cfg.ExternalPrysm.GetParameters(), envVars)
 		case config.ConsensusClient_Teku:
-			AddParametersToEnvVars(cfg.ExternalTeku.GetParameters(), envVars)
+			config.AddParametersToEnvVars(cfg.ExternalTeku.GetParameters(), envVars)
 		}
 	}
 	// Get the hostname of the Consensus client, necessary for Prometheus to work in hybrid mode
@@ -1005,9 +1014,9 @@ func (cfg *RocketPoolConfig) GenerateEnvironmentVariables() map[string]string {
 
 	// Metrics
 	if cfg.EnableMetrics.Value == true {
-		AddParametersToEnvVars(cfg.Exporter.GetParameters(), envVars)
-		AddParametersToEnvVars(cfg.Prometheus.GetParameters(), envVars)
-		AddParametersToEnvVars(cfg.Grafana.GetParameters(), envVars)
+		config.AddParametersToEnvVars(cfg.Exporter.GetParameters(), envVars)
+		config.AddParametersToEnvVars(cfg.Prometheus.GetParameters(), envVars)
+		config.AddParametersToEnvVars(cfg.Grafana.GetParameters(), envVars)
 
 		if cfg.Exporter.RootFs.Value == true {
 			envVars["EXPORTER_ROOTFS_COMMAND"] = ", \"--path.rootfs=/rootfs\""
@@ -1029,8 +1038,11 @@ func (cfg *RocketPoolConfig) GenerateEnvironmentVariables() map[string]string {
 
 	// Bitfly Node Metrics
 	if cfg.EnableBitflyNodeMetrics.Value == true {
-		AddParametersToEnvVars(cfg.BitflyNodeMetrics.GetParameters(), envVars)
+		config.AddParametersToEnvVars(cfg.BitflyNodeMetrics.GetParameters(), envVars)
 	}
+
+	// Addons
+	cfg.GraffitiWallWriter.UpdateEnvVars(envVars)
 
 	return envVars
 
@@ -1157,17 +1169,6 @@ func (cfg *RocketPoolConfig) applyAllDefaults() error {
 	}
 
 	return nil
-}
-
-// Add the parameters to the collection of environment variabes
-func AddParametersToEnvVars(params []*config.Parameter, envVars map[string]string) {
-	for _, param := range params {
-		for _, envVar := range param.EnvironmentVariables {
-			if envVar != "" {
-				envVars[envVar] = fmt.Sprint(param.Value)
-			}
-		}
-	}
 }
 
 // Get all of the changed settings between an old and new config
