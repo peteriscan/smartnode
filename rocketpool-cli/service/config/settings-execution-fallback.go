@@ -4,6 +4,7 @@ import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 	"github.com/rocket-pool/smartnode/shared/services/config"
+	cfgtypes "github.com/rocket-pool/smartnode/shared/types/config"
 )
 
 // The page wrapper for the fallback EC config
@@ -138,13 +139,13 @@ func (configPage *FallbackExecutionConfigPage) handleFallbackEcModeChanged() {
 	configPage.layout.form.AddFormItem(configPage.reconnectDelay.item)
 	configPage.layout.form.AddFormItem(configPage.fallbackEcModeDropdown.item)
 
-	selectedMode := configPage.masterConfig.FallbackExecutionClientMode.Value.(config.Mode)
+	selectedMode := configPage.masterConfig.FallbackExecutionClientMode.Value.(cfgtypes.Mode)
 	switch selectedMode {
-	case config.Mode_Local:
+	case cfgtypes.Mode_Local:
 		// Local (Docker mode)
 		configPage.handleLocalFallbackEcChanged()
 
-	case config.Mode_External:
+	case cfgtypes.Mode_External:
 		// External (Hybrid mode)
 		for _, param := range configPage.fallbackExternalECItems {
 			configPage.layout.form.AddFormItem(param.item)
@@ -160,12 +161,12 @@ func (configPage *FallbackExecutionConfigPage) handleLocalFallbackEcChanged() {
 	configPage.layout.form.AddFormItem(configPage.reconnectDelay.item)
 	configPage.layout.form.AddFormItem(configPage.fallbackEcModeDropdown.item)
 	configPage.layout.form.AddFormItem(configPage.fallbackEcDropdown.item)
-	selectedEc := configPage.masterConfig.FallbackExecutionClient.Value.(config.ExecutionClient)
+	selectedEc := configPage.masterConfig.FallbackExecutionClient.Value.(cfgtypes.ExecutionClient)
 
 	switch selectedEc {
-	case config.ExecutionClient_Infura:
+	case cfgtypes.ExecutionClient_Infura:
 		configPage.layout.addFormItemsWithCommonParams(configPage.fallbackEcCommonItems, configPage.fallbackInfuraItems, configPage.masterConfig.FallbackInfura.UnsupportedCommonParams)
-	case config.ExecutionClient_Pocket:
+	case cfgtypes.ExecutionClient_Pocket:
 		configPage.layout.addFormItemsWithCommonParams(configPage.fallbackEcCommonItems, configPage.fallbackPocketItems, configPage.masterConfig.FallbackPocket.UnsupportedCommonParams)
 	}
 

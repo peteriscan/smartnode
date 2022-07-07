@@ -11,6 +11,7 @@ import (
 	"github.com/rocket-pool/rocketpool-go/utils"
 	"github.com/rocket-pool/rocketpool-go/utils/eth"
 	"github.com/rocket-pool/smartnode/shared/services/config"
+	cfgtypes "github.com/rocket-pool/smartnode/shared/types/config"
 	"github.com/rocket-pool/smartnode/shared/utils/log"
 	"github.com/rocket-pool/smartnode/shared/utils/math"
 )
@@ -84,21 +85,21 @@ func GetEventLogInterval(cfg *config.RocketPoolConfig) (*big.Int, error) {
 	ecMode := cfg.ExecutionClientMode.Value
 
 	switch ecMode {
-	case config.Mode_External:
+	case cfgtypes.Mode_External:
 		// Use the Geth limit for external clients
 		eventLogInterval = big.NewInt(int64(cfg.Geth.EventLogInterval))
 
-	case config.Mode_Local:
+	case cfgtypes.Mode_Local:
 		switch cfg.ExecutionClient.Value {
-		case config.ExecutionClient_Geth:
+		case cfgtypes.ExecutionClient_Geth:
 			eventLogInterval = big.NewInt(int64(cfg.Geth.EventLogInterval))
-		case config.ExecutionClient_Nethermind:
+		case cfgtypes.ExecutionClient_Nethermind:
 			eventLogInterval = big.NewInt(int64(cfg.Nethermind.EventLogInterval))
-		case config.ExecutionClient_Besu:
+		case cfgtypes.ExecutionClient_Besu:
 			eventLogInterval = big.NewInt(int64(cfg.Besu.EventLogInterval))
-		case config.ExecutionClient_Infura:
+		case cfgtypes.ExecutionClient_Infura:
 			eventLogInterval = big.NewInt(int64(cfg.Infura.EventLogInterval))
-		case config.ExecutionClient_Pocket:
+		case cfgtypes.ExecutionClient_Pocket:
 			eventLogInterval = big.NewInt(int64(cfg.Pocket.EventLogInterval))
 		default:
 			return nil, fmt.Errorf("unknown execution client selected: %v", cfg.ExecutionClient.Value)

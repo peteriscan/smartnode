@@ -3,6 +3,7 @@ package config
 import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/rocket-pool/smartnode/shared/services/config"
+	cfgtypes "github.com/rocket-pool/smartnode/shared/types/config"
 )
 
 // The page wrapper for the EC config
@@ -121,13 +122,13 @@ func (configPage *ExecutionConfigPage) handleEcModeChanged() {
 	configPage.layout.form.Clear(true)
 	configPage.layout.form.AddFormItem(configPage.ecModeDropdown.item)
 
-	selectedMode := configPage.masterConfig.ExecutionClientMode.Value.(config.Mode)
+	selectedMode := configPage.masterConfig.ExecutionClientMode.Value.(cfgtypes.Mode)
 	switch selectedMode {
-	case config.Mode_Local:
+	case cfgtypes.Mode_Local:
 		// Local (Docker mode)
 		configPage.handleLocalEcChanged()
 
-	case config.Mode_External:
+	case cfgtypes.Mode_External:
 		// External (Hybrid mode)
 		for _, param := range configPage.externalEcItems {
 			configPage.layout.form.AddFormItem(param.item)
@@ -141,18 +142,18 @@ func (configPage *ExecutionConfigPage) handleLocalEcChanged() {
 	configPage.layout.form.Clear(true)
 	configPage.layout.form.AddFormItem(configPage.ecModeDropdown.item)
 	configPage.layout.form.AddFormItem(configPage.ecDropdown.item)
-	selectedEc := configPage.masterConfig.ExecutionClient.Value.(config.ExecutionClient)
+	selectedEc := configPage.masterConfig.ExecutionClient.Value.(cfgtypes.ExecutionClient)
 
 	switch selectedEc {
-	case config.ExecutionClient_Geth:
+	case cfgtypes.ExecutionClient_Geth:
 		configPage.layout.addFormItemsWithCommonParams(configPage.ecCommonItems, configPage.gethItems, configPage.masterConfig.Geth.UnsupportedCommonParams)
-	case config.ExecutionClient_Nethermind:
+	case cfgtypes.ExecutionClient_Nethermind:
 		configPage.layout.addFormItemsWithCommonParams(configPage.ecCommonItems, configPage.nethermindItems, configPage.masterConfig.Nethermind.UnsupportedCommonParams)
-	case config.ExecutionClient_Besu:
+	case cfgtypes.ExecutionClient_Besu:
 		configPage.layout.addFormItemsWithCommonParams(configPage.ecCommonItems, configPage.besuItems, configPage.masterConfig.Besu.UnsupportedCommonParams)
-	case config.ExecutionClient_Infura:
+	case cfgtypes.ExecutionClient_Infura:
 		configPage.layout.addFormItemsWithCommonParams(configPage.ecCommonItems, configPage.infuraItems, configPage.masterConfig.Infura.UnsupportedCommonParams)
-	case config.ExecutionClient_Pocket:
+	case cfgtypes.ExecutionClient_Pocket:
 		configPage.layout.addFormItemsWithCommonParams(configPage.ecCommonItems, configPage.pocketItems, configPage.masterConfig.Pocket.UnsupportedCommonParams)
 	}
 

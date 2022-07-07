@@ -1,7 +1,7 @@
 package config
 
 import (
-	"github.com/rocket-pool/smartnode/shared/services/config"
+	cfgtypes "github.com/rocket-pool/smartnode/shared/types/config"
 )
 
 func createFallbackEcStep(wiz *wizard, currentStep int, totalSteps int) *choiceWizardStep {
@@ -24,7 +24,7 @@ func createFallbackEcStep(wiz *wizard, currentStep int, totalSteps int) *choiceW
 		modal.focus(0) // Catch-all for safety
 
 		if wiz.md.Config.UseFallbackExecutionClient.Value == true {
-			if wiz.md.Config.FallbackExecutionClientMode.Value == config.Mode_External {
+			if wiz.md.Config.FallbackExecutionClientMode.Value == cfgtypes.Mode_External {
 				modal.focus(len(clientNames) - 1)
 			} else {
 				// Focus the selected option
@@ -44,17 +44,17 @@ func createFallbackEcStep(wiz *wizard, currentStep int, totalSteps int) *choiceW
 			wiz.consensusModeModal.show()
 		} else if buttonLabel == "External" {
 			wiz.md.Config.UseFallbackExecutionClient.Value = true
-			wiz.md.Config.FallbackExecutionClientMode.Value = config.Mode_External
+			wiz.md.Config.FallbackExecutionClientMode.Value = cfgtypes.Mode_External
 			wiz.fallbackExternalExecutionModal.show()
 		} else {
 			wiz.md.Config.UseFallbackExecutionClient.Value = true
-			selectedClient := clients[buttonIndex-1].Value.(config.ExecutionClient)
-			wiz.md.Config.FallbackExecutionClientMode.Value = config.Mode_Local
+			selectedClient := clients[buttonIndex-1].Value.(cfgtypes.ExecutionClient)
+			wiz.md.Config.FallbackExecutionClientMode.Value = cfgtypes.Mode_Local
 			wiz.md.Config.FallbackExecutionClient.Value = selectedClient
 			switch selectedClient {
-			case config.ExecutionClient_Infura:
+			case cfgtypes.ExecutionClient_Infura:
 				wiz.fallbackExecutionLocalInfuraWarning.show()
-			case config.ExecutionClient_Pocket:
+			case cfgtypes.ExecutionClient_Pocket:
 				wiz.fallbackExecutionLocalPocketWarning.show()
 			default:
 				wiz.consensusModeModal.show()

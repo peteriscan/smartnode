@@ -3,7 +3,7 @@ package config
 import (
 	"fmt"
 
-	"github.com/rocket-pool/smartnode/shared/services/config"
+	cfgtypes "github.com/rocket-pool/smartnode/shared/types/config"
 )
 
 func createCcModeStep(wiz *wizard, currentStep int, totalSteps int) *choiceWizardStep {
@@ -34,11 +34,11 @@ func createCcModeStep(wiz *wizard, currentStep int, totalSteps int) *choiceWizar
 	done := func(buttonIndex int, buttonLabel string) {
 		wiz.md.Config.ConsensusClientMode.Value = modes[buttonIndex].Value
 		switch modes[buttonIndex].Value {
-		case config.Mode_Local:
+		case cfgtypes.Mode_Local:
 			wiz.md.pages.RemovePage(localCcStepID)
 			wiz.consensusLocalModal = createLocalCcStep(wiz, currentStep+1, totalSteps)
 			wiz.consensusLocalModal.show()
-		case config.Mode_External:
+		case cfgtypes.Mode_External:
 			wiz.consensusExternalSelectModal.show()
 		default:
 			panic(fmt.Sprintf("Unknown execution client mode %s", modes[buttonIndex].Value))

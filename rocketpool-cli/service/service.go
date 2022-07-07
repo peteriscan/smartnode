@@ -19,6 +19,7 @@ import (
 	"github.com/rocket-pool/smartnode/shared"
 	"github.com/rocket-pool/smartnode/shared/services/config"
 	"github.com/rocket-pool/smartnode/shared/services/rocketpool"
+	cfgtypes "github.com/rocket-pool/smartnode/shared/types/config"
 	cliutils "github.com/rocket-pool/smartnode/shared/utils/cli"
 	"github.com/shirou/gopsutil/v3/disk"
 )
@@ -386,7 +387,7 @@ func configureHeadless(c *cli.Context, cfg *config.RocketPoolConfig) error {
 }
 
 // Updates a config parameter from a CLI flag
-func updateConfigParamFromCliArg(c *cli.Context, sectionName string, param *config.Parameter, cfg *config.RocketPoolConfig) error {
+func updateConfigParamFromCliArg(c *cli.Context, sectionName string, param *cfgtypes.Parameter, cfg *config.RocketPoolConfig) error {
 
 	var paramName string
 	if sectionName == "" {
@@ -397,23 +398,23 @@ func updateConfigParamFromCliArg(c *cli.Context, sectionName string, param *conf
 
 	if c.IsSet(paramName) {
 		switch param.Type {
-		case config.ParameterType_Bool:
+		case cfgtypes.ParameterType_Bool:
 			param.Value = c.Bool(paramName)
-		case config.ParameterType_Int:
+		case cfgtypes.ParameterType_Int:
 			param.Value = c.Int(paramName)
-		case config.ParameterType_Float:
+		case cfgtypes.ParameterType_Float:
 			param.Value = c.Float64(paramName)
-		case config.ParameterType_String:
+		case cfgtypes.ParameterType_String:
 			setting := c.String(paramName)
 			if param.MaxLength > 0 && len(setting) > param.MaxLength {
 				return fmt.Errorf("error setting value for %s: [%s] is too long (max length %d)", paramName, setting, param.MaxLength)
 			}
 			param.Value = c.String(paramName)
-		case config.ParameterType_Uint:
+		case cfgtypes.ParameterType_Uint:
 			param.Value = c.Uint(paramName)
-		case config.ParameterType_Uint16:
+		case cfgtypes.ParameterType_Uint16:
 			param.Value = uint16(c.Uint(paramName))
-		case config.ParameterType_Choice:
+		case cfgtypes.ParameterType_Choice:
 			selection := c.String(paramName)
 			found := false
 			for _, option := range param.Options {
@@ -579,8 +580,8 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 	}
 
 	// Force a delay if using Teku and upgrading from v1.3.0 or below because of the slashing protection DB migration in v1.3.1+
-	isLocalTeku := (cfg.ConsensusClientMode.Value.(config.Mode) == config.Mode_Local && cfg.ConsensusClient.Value.(config.ConsensusClient) == config.ConsensusClient_Teku)
-	isExternalTeku := (cfg.ConsensusClientMode.Value.(config.Mode) == config.Mode_External && cfg.ExternalConsensusClient.Value.(config.ConsensusClient) == config.ConsensusClient_Teku)
+	isLocalTeku := (cfg.ConsensusClientMode.Value.(cfgtypes.Mode) == cfgtypes.Mode_Local && cfg.ConsensusClient.Value.(cfgtypes.ConsensusClient) == cfgtypes.ConsensusClient_Teku)
+	isExternalTeku := (cfg.ConsensusClientMode.Value.(cfgtypes.Mode) == cfgtypes.Mode_External && cfg.ExternalConsensusClient.Value.(cfgtypes.ConsensusClient) == cfgtypes.ConsensusClient_Teku)
 	if isUpdate && !isNew && !cfg.IsNativeMode && (isLocalTeku || isExternalTeku) && !c.Bool("ignore-slash-timer") {
 		previousVersion := "0.0.0"
 		backupCfg, err := rp.LoadBackupConfig()
@@ -614,10 +615,10 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 	}
 
 	// Warn about light ECs
-	if cfg.ExecutionClientMode.Value.(config.Mode) == config.Mode_Local && (cfg.ExecutionClient.Value.(config.ExecutionClient) == config.ExecutionClient_Infura || cfg.ExecutionClient.Value.(config.ExecutionClient) == config.ExecutionClient_Pocket) {
+	if cfg.ExecutionClientMode.Value.(cfgtypes.Mode) == cfgtypes.Mode_Local && (cfg.ExecutionClient.Value.(cfgtypes.ExecutionClient) == cfgtypes.ExecutionClient_Infura || cfg.ExecutionClient.Value.(cfgtypes.ExecutionClient) == cfgtypes.ExecutionClient_Pocket) {
 		fmt.Printf("==========\n%sWARNING: you are using a light client (Infura or Pocket) as your primary Execution client.\nLight clients are NOT COMPATIBLE with the upcoming Ethereum Merge, and will be removed in a future version of the Smartnode.\n\nPlease switch to a full client such as Geth, Nethermind, or Besu as soon as possible.\n\nThis can be done via the `rocketpool service config` Terminal UI by simply selecting a different client from the Execution Client drop-down menu in the Execution Client (ETH1) section.%s\n==========\n\n", colorRed, colorReset)
 	}
-	if cfg.UseFallbackExecutionClient.Value == true && cfg.FallbackExecutionClientMode.Value.(config.Mode) == config.Mode_Local && (cfg.FallbackExecutionClient.Value.(config.ExecutionClient) == config.ExecutionClient_Infura || cfg.FallbackExecutionClient.Value.(config.ExecutionClient) == config.ExecutionClient_Pocket) {
+	if cfg.UseFallbackExecutionClient.Value == true && cfg.FallbackExecutionClientMode.Value.(cfgtypes.Mode) == cfgtypes.Mode_Local && (cfg.FallbackExecutionClient.Value.(cfgtypes.ExecutionClient) == cfgtypes.ExecutionClient_Infura || cfg.FallbackExecutionClient.Value.(cfgtypes.ExecutionClient) == cfgtypes.ExecutionClient_Pocket) {
 		fmt.Printf("==========\n%sWARNING: you are using a light client (Infura or Pocket) as your fallback Execution client.\nLight clients are NOT COMPATIBLE with the upcoming Ethereum Merge, and will be removed in a future version of the Smartnode.\n\nIf you wish to continue using a fallback Execution client after light clients have been removed, you will need to run one on a separate machine and use Externally Managed mode for your fallback Execution client in the `rocketpool service config` Terminal UI.%s\n==========\n\n", colorRed, colorReset)
 	}
 
@@ -890,16 +891,16 @@ func pruneExecutionClient(c *cli.Context) error {
 	}
 
 	// Sanity checks
-	if cfg.ExecutionClientMode.Value.(config.Mode) == config.Mode_External {
+	if cfg.ExecutionClientMode.Value.(cfgtypes.Mode) == cfgtypes.Mode_External {
 		fmt.Println("You are using an externally managed Execution client.\nThe Smartnode cannot prune it for you.")
 		return nil
 	}
 	if cfg.IsNativeMode {
 		fmt.Println("You are using Native Mode.\nThe Smartnode cannot prune your Execution client for you, you'll have to do it manually.")
 	}
-	selectedEc := cfg.ExecutionClient.Value.(config.ExecutionClient)
+	selectedEc := cfg.ExecutionClient.Value.(cfgtypes.ExecutionClient)
 	switch selectedEc {
-	case config.ExecutionClient_Besu:
+	case cfgtypes.ExecutionClient_Besu:
 		fmt.Println("You are using Besu as your Execution client.\nBesu does not need pruning.")
 		return nil
 	}
@@ -911,10 +912,10 @@ func pruneExecutionClient(c *cli.Context) error {
 		fmt.Printf("%sYou do not have a fallback execution client configured.\nYou will continue attesting while it prunes, but block proposals and most of Rocket Pool's commands will not work.\nPlease configure a fallback client with `rocketpool service config` before running this.%s\n", colorRed, colorReset)
 	} else {
 		var fallbackClientName string
-		if cfg.FallbackExecutionClientMode.Value.(config.Mode) == config.Mode_External {
+		if cfg.FallbackExecutionClientMode.Value.(cfgtypes.Mode) == cfgtypes.Mode_External {
 			fallbackClientName = cfg.FallbackExternalExecution.HttpUrl.Value.(string)
 		} else {
-			fallbackClientName = fmt.Sprint(cfg.FallbackExecutionClient.Value.(config.ExecutionClient))
+			fallbackClientName = fmt.Sprint(cfg.FallbackExecutionClient.Value.(cfgtypes.ExecutionClient))
 		}
 		fmt.Printf("You have a fallback execution client configured (%s). Rocket Pool (and your consensus client) will use that while the main client is pruning.\n", fallbackClientName)
 	}
@@ -926,7 +927,7 @@ func pruneExecutionClient(c *cli.Context) error {
 	}
 
 	// Prompt for stopping the node container if using Infura to prevent people from hitting the rate limit
-	if cfg.FallbackExecutionClient.Value.(config.ExecutionClient) == config.ExecutionClient_Infura {
+	if cfg.FallbackExecutionClient.Value.(cfgtypes.ExecutionClient) == cfgtypes.ExecutionClient_Infura {
 		fmt.Printf("\n%s=== NOTE ===\n\n", colorYellow)
 		fmt.Printf("If you are using Infura's free tier, you may hit its rate limit if pruning takes a long time.\n")
 		fmt.Printf("If this happens, you should temporarily disable the `%s` container until pruning is complete. This will:\n", prefix+NodeContainerSuffix)
@@ -1008,7 +1009,7 @@ func pruneExecutionClient(c *cli.Context) error {
 		return fmt.Errorf("Unexpected output while starting main execution client: %s", result)
 	}
 
-	if selectedEc == config.ExecutionClient_Nethermind {
+	if selectedEc == cfgtypes.ExecutionClient_Nethermind {
 		err = rp.RunNethermindPruneStarter(executionContainerName)
 		if err != nil {
 			return err
@@ -1166,27 +1167,27 @@ func serviceVersion(c *cli.Context) error {
 
 	// Get the execution client string
 	var eth1ClientString string
-	eth1ClientMode := cfg.ExecutionClientMode.Value.(config.Mode)
+	eth1ClientMode := cfg.ExecutionClientMode.Value.(cfgtypes.Mode)
 	switch eth1ClientMode {
-	case config.Mode_Local:
-		eth1Client := cfg.ExecutionClient.Value.(config.ExecutionClient)
+	case cfgtypes.Mode_Local:
+		eth1Client := cfg.ExecutionClient.Value.(cfgtypes.ExecutionClient)
 		format := "%s (Locally managed)\n\tImage: %s"
 		switch eth1Client {
-		case config.ExecutionClient_Geth:
+		case cfgtypes.ExecutionClient_Geth:
 			eth1ClientString = fmt.Sprintf(format, "Geth", cfg.Geth.ContainerTag.Value.(string))
-		case config.ExecutionClient_Nethermind:
+		case cfgtypes.ExecutionClient_Nethermind:
 			eth1ClientString = fmt.Sprintf(format, "Nethermind", cfg.Nethermind.ContainerTag.Value.(string))
-		case config.ExecutionClient_Besu:
+		case cfgtypes.ExecutionClient_Besu:
 			eth1ClientString = fmt.Sprintf(format, "Besu", cfg.Besu.ContainerTag.Value.(string))
-		case config.ExecutionClient_Infura:
+		case cfgtypes.ExecutionClient_Infura:
 			eth1ClientString = fmt.Sprintf(format, "Infura", cfg.Smartnode.GetPowProxyContainerTag())
-		case config.ExecutionClient_Pocket:
+		case cfgtypes.ExecutionClient_Pocket:
 			eth1ClientString = fmt.Sprintf(format, "Pocket", cfg.Smartnode.GetPowProxyContainerTag())
 		default:
 			return fmt.Errorf("unknown local execution client [%v]", eth1Client)
 		}
 
-	case config.Mode_External:
+	case cfgtypes.Mode_External:
 		eth1ClientString = "Externally managed"
 
 	default:
@@ -1195,34 +1196,34 @@ func serviceVersion(c *cli.Context) error {
 
 	// Get the consensus client string
 	var eth2ClientString string
-	eth2ClientMode := cfg.ConsensusClientMode.Value.(config.Mode)
+	eth2ClientMode := cfg.ConsensusClientMode.Value.(cfgtypes.Mode)
 	switch eth2ClientMode {
-	case config.Mode_Local:
-		eth2Client := cfg.ConsensusClient.Value.(config.ConsensusClient)
+	case cfgtypes.Mode_Local:
+		eth2Client := cfg.ConsensusClient.Value.(cfgtypes.ConsensusClient)
 		format := "%s (Locally managed)\n\tImage: %s"
 		switch eth2Client {
-		case config.ConsensusClient_Lighthouse:
+		case cfgtypes.ConsensusClient_Lighthouse:
 			eth2ClientString = fmt.Sprintf(format, "Lighthouse", cfg.Lighthouse.ContainerTag.Value.(string))
-		case config.ConsensusClient_Nimbus:
+		case cfgtypes.ConsensusClient_Nimbus:
 			eth2ClientString = fmt.Sprintf(format, "Nimbus", cfg.Nimbus.ContainerTag.Value.(string))
-		case config.ConsensusClient_Prysm:
+		case cfgtypes.ConsensusClient_Prysm:
 			// Prysm is a special case, as the BN and VC image versions may differ
 			eth2ClientString = fmt.Sprintf(format+"\n\tVC image: %s", "Prysm", cfg.Prysm.BnContainerTag.Value.(string), cfg.Prysm.VcContainerTag.Value.(string))
-		case config.ConsensusClient_Teku:
+		case cfgtypes.ConsensusClient_Teku:
 			eth2ClientString = fmt.Sprintf(format, "Teku", cfg.Teku.ContainerTag.Value.(string))
 		default:
 			return fmt.Errorf("unknown local consensus client [%v]", eth2Client)
 		}
 
-	case config.Mode_External:
-		eth2Client := cfg.ExternalConsensusClient.Value.(config.ConsensusClient)
+	case cfgtypes.Mode_External:
+		eth2Client := cfg.ExternalConsensusClient.Value.(cfgtypes.ConsensusClient)
 		format := "%s (Externally managed)\n\tVC Image: %s"
 		switch eth2Client {
-		case config.ConsensusClient_Lighthouse:
+		case cfgtypes.ConsensusClient_Lighthouse:
 			eth2ClientString = fmt.Sprintf(format, "Lighthouse", cfg.ExternalLighthouse.ContainerTag.Value.(string))
-		case config.ConsensusClient_Prysm:
+		case cfgtypes.ConsensusClient_Prysm:
 			eth2ClientString = fmt.Sprintf(format, "Prysm", cfg.ExternalPrysm.ContainerTag.Value.(string))
-		case config.ConsensusClient_Teku:
+		case cfgtypes.ConsensusClient_Teku:
 			eth2ClientString = fmt.Sprintf(format, "Teku", cfg.ExternalTeku.ContainerTag.Value.(string))
 		default:
 			return fmt.Errorf("unknown external consensus client [%v]", eth2Client)
@@ -1272,7 +1273,7 @@ func resyncEth1(c *cli.Context) error {
 		fmt.Printf("%sYou do not have a fallback ETH1 client configured.\nPlease configure a fallback client with `rocketpool service config` before running this.%s\n", colorRed, colorReset)
 		return nil
 	} else {
-		fmt.Printf("You have a fallback ETH1 client configured (%v). Rocket Pool (and your ETH2 client) will use that while the main client is resyncing.\n", cfg.FallbackExecutionClient.Value.(config.ExecutionClient))
+		fmt.Printf("You have a fallback ETH1 client configured (%v). Rocket Pool (and your ETH2 client) will use that while the main client is resyncing.\n", cfg.FallbackExecutionClient.Value.(cfgtypes.ExecutionClient))
 	}
 
 	// Get the container prefix
@@ -1282,7 +1283,7 @@ func resyncEth1(c *cli.Context) error {
 	}
 
 	// Prompt for stopping the node container if using Infura to prevent people from hitting the rate limit
-	if cfg.FallbackExecutionClient.Value.(config.ExecutionClient) == config.ExecutionClient_Infura {
+	if cfg.FallbackExecutionClient.Value.(cfgtypes.ExecutionClient) == cfgtypes.ExecutionClient_Infura {
 		fmt.Printf("\n%s=== NOTE ===\n\n", colorYellow)
 		fmt.Printf("If you are using Infura's free tier, you will very likely hit its rate limit while resyncing.\n")
 		fmt.Printf("You should temporarily disable the `%s` container until resyncing is complete. This will:\n", prefix+NodeContainerSuffix)
@@ -1373,17 +1374,17 @@ func resyncEth2(c *cli.Context) error {
 	// Get the parameters that the selected client doesn't support
 	var unsupportedParams []string
 	var clientName string
-	eth2ClientMode := cfg.ConsensusClientMode.Value.(config.Mode)
+	eth2ClientMode := cfg.ConsensusClientMode.Value.(cfgtypes.Mode)
 	switch eth2ClientMode {
-	case config.Mode_Local:
+	case cfgtypes.Mode_Local:
 		selectedClientConfig, err := cfg.GetSelectedConsensusClientConfig()
 		if err != nil {
 			return fmt.Errorf("error getting selected consensus client config: %w", err)
 		}
-		unsupportedParams = selectedClientConfig.(config.LocalConsensusConfig).GetUnsupportedCommonParams()
+		unsupportedParams = selectedClientConfig.(cfgtypes.LocalConsensusConfig).GetUnsupportedCommonParams()
 		clientName = selectedClientConfig.GetName()
 
-	case config.Mode_External:
+	case cfgtypes.Mode_External:
 		fmt.Println("You use an externally-managed Consensus client. Rocket Pool cannot resync it for you.")
 		return nil
 
@@ -1528,10 +1529,10 @@ func exportEcData(c *cli.Context, targetDir string) error {
 		fmt.Printf("%sYou do not have a fallback execution client configured.\nYou will continue attesting while exporting the chain data, but block proposals and most of Rocket Pool's commands will not work.\nPlease configure a fallback client with `rocketpool service config` before running this.%s\n\n", colorRed, colorReset)
 	} else {
 		var fallbackClientName string
-		if cfg.FallbackExecutionClientMode.Value.(config.Mode) == config.Mode_External {
+		if cfg.FallbackExecutionClientMode.Value.(cfgtypes.Mode) == cfgtypes.Mode_External {
 			fallbackClientName = cfg.FallbackExternalExecution.HttpUrl.Value.(string)
 		} else {
-			fallbackClientName = fmt.Sprint(cfg.FallbackExecutionClient.Value.(config.ExecutionClient))
+			fallbackClientName = fmt.Sprint(cfg.FallbackExecutionClient.Value.(cfgtypes.ExecutionClient))
 		}
 		fmt.Printf("You have a fallback execution client configured (%s).\nRocket Pool (and your consensus client) will use that while the main client is offline.\n\n", fallbackClientName)
 	}
@@ -1657,10 +1658,10 @@ func importEcData(c *cli.Context, sourceDir string) error {
 		fmt.Printf("%sYou do not have a fallback execution client configured.\nYou will continue attesting while importing the chain data, but block proposals and most of Rocket Pool's commands will not work.\nPlease configure a fallback client with `rocketpool service config` before running this.%s\n\n", colorRed, colorReset)
 	} else {
 		var fallbackClientName string
-		if cfg.FallbackExecutionClientMode.Value.(config.Mode) == config.Mode_External {
+		if cfg.FallbackExecutionClientMode.Value.(cfgtypes.Mode) == cfgtypes.Mode_External {
 			fallbackClientName = cfg.FallbackExternalExecution.HttpUrl.Value.(string)
 		} else {
-			fallbackClientName = fmt.Sprint(cfg.FallbackExecutionClient.Value.(config.ExecutionClient))
+			fallbackClientName = fmt.Sprint(cfg.FallbackExecutionClient.Value.(cfgtypes.ExecutionClient))
 		}
 		fmt.Printf("You have a fallback execution client configured (%s).\nRocket Pool (and your consensus client) will use that while the main client is offline.\n\n", fallbackClientName)
 	}

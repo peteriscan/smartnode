@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/rocket-pool/smartnode/shared/services/config"
+	cfgtypes "github.com/rocket-pool/smartnode/shared/types/config"
 )
 
 func createCheckpointSyncStep(wiz *wizard, currentStep int, totalSteps int) *textBoxWizardStep {
@@ -35,7 +36,7 @@ func createCheckpointSyncStep(wiz *wizard, currentStep int, totalSteps int) *tex
 		}
 
 		// Check to see if it supports doppelganger detection
-		unsupportedParams := client.(config.LocalConsensusConfig).GetUnsupportedCommonParams()
+		unsupportedParams := client.(cfgtypes.LocalConsensusConfig).GetUnsupportedCommonParams()
 		supportsDoppelganger := true
 		for _, param := range unsupportedParams {
 			if param == config.DoppelgangerDetectionID {

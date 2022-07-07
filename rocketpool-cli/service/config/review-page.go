@@ -8,6 +8,7 @@ import (
 	"github.com/rivo/tview"
 	"github.com/rocket-pool/smartnode/shared"
 	"github.com/rocket-pool/smartnode/shared/services/config"
+	cfgtypes "github.com/rocket-pool/smartnode/shared/types/config"
 )
 
 // Constants
@@ -16,17 +17,17 @@ const reviewPageID string = "review-settings"
 // The changed settings review page
 type ReviewPage struct {
 	md              *mainDisplay
-	changedSettings map[string][]config.ChangedSetting
+	changedSettings map[string][]cfgtypes.ChangedSetting
 	page            *page
 }
 
 // Create a page to review any changes
 func NewReviewPage(md *mainDisplay, oldConfig *config.RocketPoolConfig, newConfig *config.RocketPoolConfig) *ReviewPage {
 
-	var changedSettings map[string][]config.ChangedSetting
-	var totalAffectedContainers map[config.ContainerID]bool
+	var changedSettings map[string][]cfgtypes.ChangedSetting
+	var totalAffectedContainers map[cfgtypes.ContainerID]bool
 	var changeNetworks bool
-	var containersToRestart []config.ContainerID
+	var containersToRestart []cfgtypes.ContainerID
 
 	// Create the visual list for all of the changed settings
 	changeBox := tview.NewTextView().
@@ -45,25 +46,25 @@ func NewReviewPage(md *mainDisplay, oldConfig *config.RocketPoolConfig, newConfi
 		}
 	} else {
 		// Warn about light clients
-		if newConfig.ExecutionClientMode.Value.(config.Mode) == config.Mode_Local && (newConfig.ExecutionClient.Value.(config.ExecutionClient) == config.ExecutionClient_Infura || newConfig.ExecutionClient.Value.(config.ExecutionClient) == config.ExecutionClient_Pocket) {
+		if newConfig.ExecutionClientMode.Value.(cfgtypes.Mode) == cfgtypes.Mode_Local && (newConfig.ExecutionClient.Value.(cfgtypes.ExecutionClient) == cfgtypes.ExecutionClient_Infura || newConfig.ExecutionClient.Value.(cfgtypes.ExecutionClient) == cfgtypes.ExecutionClient_Pocket) {
 			builder.WriteString("==========\n[orange]WARNING: you are using a light client (Infura or Pocket) as your primary Execution client.\nLight clients are NOT COMPATIBLE with the upcoming Ethereum Merge, and will be removed in a future version of the Smartnode.\n\nPlease switch to a full client such as Geth, Nethermind, or Besu as soon as possible.[white]\n==========\n\n")
 		}
-		if newConfig.UseFallbackExecutionClient.Value == true && newConfig.FallbackExecutionClientMode.Value.(config.Mode) == config.Mode_Local && (newConfig.FallbackExecutionClient.Value.(config.ExecutionClient) == config.ExecutionClient_Infura || newConfig.FallbackExecutionClient.Value.(config.ExecutionClient) == config.ExecutionClient_Pocket) {
+		if newConfig.UseFallbackExecutionClient.Value == true && newConfig.FallbackExecutionClientMode.Value.(cfgtypes.Mode) == cfgtypes.Mode_Local && (newConfig.FallbackExecutionClient.Value.(cfgtypes.ExecutionClient) == cfgtypes.ExecutionClient_Infura || newConfig.FallbackExecutionClient.Value.(cfgtypes.ExecutionClient) == cfgtypes.ExecutionClient_Pocket) {
 			builder.WriteString("==========\n[orange]WARNING: you are using a light client (Infura or Pocket) as your fallback Execution client.\nLight clients are NOT COMPATIBLE with the upcoming Ethereum Merge, and will be removed in a future version of the Smartnode.\n\nIf you wish to continue using a fallback Execution client after light clients have been removed, you will need to run one on a separate machine and use Externally Managed mode for your fallback Execution client.[white]\n==========\n\n")
 		}
 		// Get the map of changed settings by category
 		changedSettings, totalAffectedContainers, changeNetworks = newConfig.GetChanges(oldConfig)
 
 		if md.isUpdate || md.isMigration {
-			totalAffectedContainers[config.ContainerID_Api] = true
-			totalAffectedContainers[config.ContainerID_Node] = true
-			totalAffectedContainers[config.ContainerID_Watchtower] = true
+			totalAffectedContainers[cfgtypes.ContainerID_Api] = true
+			totalAffectedContainers[cfgtypes.ContainerID_Node] = true
+			totalAffectedContainers[cfgtypes.ContainerID_Watchtower] = true
 
-			if newConfig.ExecutionClientMode.Value.(config.Mode) == config.Mode_Local && newConfig.ExecutionClient.Value.(config.ExecutionClient) != config.ExecutionClient_Geth {
-				totalAffectedContainers[config.ContainerID_Eth1] = true
+			if newConfig.ExecutionClientMode.Value.(cfgtypes.Mode) == cfgtypes.Mode_Local && newConfig.ExecutionClient.Value.(cfgtypes.ExecutionClient) != cfgtypes.ExecutionClient_Geth {
+				totalAffectedContainers[cfgtypes.ContainerID_Eth1] = true
 			}
-			if newConfig.FallbackExecutionClientMode.Value.(config.Mode) == config.Mode_Local {
-				totalAffectedContainers[config.ContainerID_Eth1Fallback] = true
+			if newConfig.FallbackExecutionClientMode.Value.(cfgtypes.Mode) == cfgtypes.Mode_Local {
+				totalAffectedContainers[cfgtypes.ContainerID_Eth1Fallback] = true
 			}
 			builder.WriteString(fmt.Sprintf("Updated to Smartnode v%s (will affect several containers)\n\n", shared.RocketPoolVersion))
 		}

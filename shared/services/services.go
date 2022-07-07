@@ -25,6 +25,7 @@ import (
 	nmkeystore "github.com/rocket-pool/smartnode/shared/services/wallet/keystore/nimbus"
 	prkeystore "github.com/rocket-pool/smartnode/shared/services/wallet/keystore/prysm"
 	tkkeystore "github.com/rocket-pool/smartnode/shared/services/wallet/keystore/teku"
+	cfgtypes "github.com/rocket-pool/smartnode/shared/types/config"
 	"github.com/rocket-pool/smartnode/shared/utils/rp"
 )
 
@@ -275,33 +276,33 @@ func getBeaconClient(cfg *config.RocketPoolConfig) (beacon.Client, error) {
 	var err error
 	initBeaconClient.Do(func() {
 		var provider string
-		var selectedCC config.ConsensusClient
+		var selectedCC cfgtypes.ConsensusClient
 		if cfg.IsNativeMode {
 			provider = cfg.Native.CcHttpUrl.Value.(string)
-			selectedCC = cfg.Native.ConsensusClient.Value.(config.ConsensusClient)
-		} else if cfg.ConsensusClientMode.Value.(config.Mode) == config.Mode_Local {
+			selectedCC = cfg.Native.ConsensusClient.Value.(cfgtypes.ConsensusClient)
+		} else if cfg.ConsensusClientMode.Value.(cfgtypes.Mode) == cfgtypes.Mode_Local {
 			provider = fmt.Sprintf("http://%s:%d", BnContainerName, cfg.ConsensusCommon.ApiPort.Value.(uint16))
-			selectedCC = cfg.ConsensusClient.Value.(config.ConsensusClient)
-		} else if cfg.ConsensusClientMode.Value.(config.Mode) == config.Mode_External {
-			var selectedConsensusConfig config.ConsensusConfig
+			selectedCC = cfg.ConsensusClient.Value.(cfgtypes.ConsensusClient)
+		} else if cfg.ConsensusClientMode.Value.(cfgtypes.Mode) == cfgtypes.Mode_External {
+			var selectedConsensusConfig cfgtypes.ConsensusConfig
 			selectedConsensusConfig, err = cfg.GetSelectedConsensusClientConfig()
 			if err != nil {
 				return
 			}
-			provider = selectedConsensusConfig.(config.ExternalConsensusConfig).GetApiUrl()
-			selectedCC = cfg.ExternalConsensusClient.Value.(config.ConsensusClient)
+			provider = selectedConsensusConfig.(cfgtypes.ExternalConsensusConfig).GetApiUrl()
+			selectedCC = cfg.ExternalConsensusClient.Value.(cfgtypes.ConsensusClient)
 		} else {
 			err = fmt.Errorf("Unknown Consensus client mode '%v'", cfg.ConsensusClientMode.Value)
 		}
 
 		switch selectedCC {
-		case config.ConsensusClient_Lighthouse:
+		case cfgtypes.ConsensusClient_Lighthouse:
 			beaconClient = lighthouse.NewClient(provider)
-		case config.ConsensusClient_Nimbus:
+		case cfgtypes.ConsensusClient_Nimbus:
 			beaconClient = nimbus.NewClient(provider)
-		case config.ConsensusClient_Prysm:
+		case cfgtypes.ConsensusClient_Prysm:
 			beaconClient = prysm.NewClient(provider)
-		case config.ConsensusClient_Teku:
+		case cfgtypes.ConsensusClient_Teku:
 			beaconClient = teku.NewClient(provider)
 		default:
 			err = fmt.Errorf("Unknown Consensus client '%v' selected", cfg.ConsensusClient.Value)

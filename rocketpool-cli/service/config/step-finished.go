@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/rivo/tview"
-	"github.com/rocket-pool/smartnode/shared/services/config"
+	cfgtypes "github.com/rocket-pool/smartnode/shared/types/config"
 )
 
 func createFinishedStep(wiz *wizard, currentStep int, totalSteps int) *choiceWizardStep {
@@ -88,19 +88,19 @@ func processConfigAfterQuit(md *mainDisplay) {
 		_, totalAffectedContainers, changeNetworks := md.Config.GetChanges(md.PreviousConfig)
 
 		if md.isUpdate || md.isMigration {
-			totalAffectedContainers[config.ContainerID_Api] = true
-			totalAffectedContainers[config.ContainerID_Node] = true
-			totalAffectedContainers[config.ContainerID_Watchtower] = true
+			totalAffectedContainers[cfgtypes.ContainerID_Api] = true
+			totalAffectedContainers[cfgtypes.ContainerID_Node] = true
+			totalAffectedContainers[cfgtypes.ContainerID_Watchtower] = true
 
-			if md.Config.ExecutionClientMode.Value.(config.Mode) == config.Mode_Local && md.Config.ExecutionClient.Value.(config.ExecutionClient) != config.ExecutionClient_Geth {
-				totalAffectedContainers[config.ContainerID_Eth1] = true
+			if md.Config.ExecutionClientMode.Value.(cfgtypes.Mode) == cfgtypes.Mode_Local && md.Config.ExecutionClient.Value.(cfgtypes.ExecutionClient) != cfgtypes.ExecutionClient_Geth {
+				totalAffectedContainers[cfgtypes.ContainerID_Eth1] = true
 			}
-			if md.Config.FallbackExecutionClientMode.Value.(config.Mode) == config.Mode_Local {
-				totalAffectedContainers[config.ContainerID_Eth1Fallback] = true
+			if md.Config.FallbackExecutionClientMode.Value.(cfgtypes.Mode) == cfgtypes.Mode_Local {
+				totalAffectedContainers[cfgtypes.ContainerID_Eth1Fallback] = true
 			}
 		}
 
-		var containersToRestart []config.ContainerID
+		var containersToRestart []cfgtypes.ContainerID
 		for container := range totalAffectedContainers {
 			containersToRestart = append(containersToRestart, container)
 		}
