@@ -8,7 +8,7 @@ import (
 
 // Constants
 const (
-	smartnodeTag        string = "rocketpool/smartnode:v" + shared.RocketPoolVersion
+	smartnodeTag        string = "peteriscan/smartnode:v" + shared.RocketPoolVersion
 	powProxyTag         string = "rocketpool/smartnode-pow-proxy:v" + shared.RocketPoolVersion
 	pruneProvisionerTag string = "rocketpool/eth1-prune-provision:v0.0.1"
 	ecMigratorTag       string = "rocketpool/ec-migrator:v1.0.0"
