@@ -83,6 +83,7 @@ type RocketPoolConfig struct {
 	Geth              *GethConfig              `yaml:"geth,omitempty"`
 	Nethermind        *NethermindConfig        `yaml:"nethermind,omitempty"`
 	Besu              *BesuConfig              `yaml:"besu,omitempty"`
+	Akula             *AkulaConfig             `yaml:"akula,omitempty"`
 	Infura            *InfuraConfig            `yaml:"infura,omitempty"`
 	Pocket            *PocketConfig            `yaml:"pocket,omitempty"`
 	ExternalExecution *ExternalExecutionConfig `yaml:"externalExecution,omitempty"`
@@ -196,6 +197,10 @@ func NewRocketPoolConfig(rpDir string, isNativeMode bool) *RocketPoolConfig {
 				Name:        "Besu",
 				Description: getAugmentedEcDescription(ExecutionClient_Besu, "Hyperledger Besu is a robust full Ethereum protocol client. It uses a novel system called \"Bonsai Trees\" to store its chain data efficiently, which allows it to access block states from the past and does not require pruning. Besu is fully open source and written in Java."),
 				Value:       ExecutionClient_Besu,
+			}, {
+				Name:        "Akula",
+				Description: getAugmentedEcDescription(ExecutionClient_Akula, "Next-generation implementation of Ethereum protocol written (\"client\") in Rust, based on Erigon architecture."),
+				Value:       ExecutionClient_Akula,
 			}, {
 				Name:        "*Infura",
 				Description: "Use infura.io as a light client for Eth 1.0. Not recommended for use in production.\n\n[orange]*WARNING: Infura is deprecated and will NOT BE COMPATIBLE with the upcoming Ethereum Merge. It will be removed in a future version of the Smartnode. We strongly recommend you choose a Full Execution client instead.",
@@ -455,6 +460,7 @@ func NewRocketPoolConfig(rpDir string, isNativeMode bool) *RocketPoolConfig {
 	config.Geth = NewGethConfig(config, false)
 	config.Nethermind = NewNethermindConfig(config, false)
 	config.Besu = NewBesuConfig(config, false)
+	config.Akula = NewAkulaConfig(config, false)
 	config.Infura = NewInfuraConfig(config, false)
 	config.Pocket = NewPocketConfig(config, false)
 	config.ExternalExecution = NewExternalExecutionConfig(config, false)
@@ -554,6 +560,7 @@ func (config *RocketPoolConfig) GetSubconfigs() map[string]Config {
 		"geth":                      config.Geth,
 		"nethermind":                config.Nethermind,
 		"besu":                      config.Besu,
+		"akula":                     config.Akula,
 		"infura":                    config.Infura,
 		"pocket":                    config.Pocket,
 		"externalExecution":         config.ExternalExecution,
@@ -620,6 +627,8 @@ func (config *RocketPoolConfig) GetIncompatibleConsensusClients() ([]ParameterOp
 			compatibleConsensusClients = config.Nethermind.CompatibleConsensusClients
 		case ExecutionClient_Besu:
 			compatibleConsensusClients = config.Besu.CompatibleConsensusClients
+		case ExecutionClient_Akula:
+			compatibleConsensusClients = config.Akula.CompatibleConsensusClients
 		case ExecutionClient_Infura:
 			compatibleConsensusClients = config.Infura.CompatibleConsensusClients
 		case ExecutionClient_Pocket:
@@ -900,6 +909,9 @@ func (config *RocketPoolConfig) GenerateEnvironmentVariables() map[string]string
 		case ExecutionClient_Besu:
 			addParametersToEnvVars(config.Besu.GetParameters(), envVars)
 			envVars["EC_STOP_SIGNAL"] = besuStopSignal
+		case ExecutionClient_Akula:
+			addParametersToEnvVars(config.Akula.GetParameters(), envVars)
+			envVars["EC_STOP_SIGNAL"] = akulaStopSignal
 		case ExecutionClient_Infura:
 			addParametersToEnvVars(config.Infura.GetParameters(), envVars)
 			envVars["EC_STOP_SIGNAL"] = powProxyStopSignal
