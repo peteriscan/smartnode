@@ -7,8 +7,8 @@ import (
 
 // Constants
 const (
-	akulaTagAmd64         string = "peteriscan/akula:latest"
-	akulaTagArm64         string = "peteriscan/akula:latest"
+	akulaTagAmd64         string = "akula:latest"
+	akulaTagArm64         string = "akula:latest"
 	akulaEventLogInterval int    = 25000
 	akulaMaxPeers         uint16 = 100
 	akulaStopSignal       string = "SIGTERM"
