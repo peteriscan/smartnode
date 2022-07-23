@@ -293,6 +293,8 @@ func (c *Client) MigrateLegacyConfig(legacyConfigFilePath string, legacySettings
 		network = config.Network_Mainnet
 	case "5":
 		network = config.Network_Prater
+	case "3":
+		network = config.Network_Ropsten
 	default:
 		return nil, fmt.Errorf("legacy config had an unknown chain ID [%s]", chainID)
 	}

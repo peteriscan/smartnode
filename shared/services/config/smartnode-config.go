@@ -130,7 +130,7 @@ func NewSmartnodeConfig(config *RocketPoolConfig) *SmartnodeConfig {
 		Network: Parameter{
 			ID:                   NetworkID,
 			Name:                 "Network",
-			Description:          "The Ethereum network you want to use - select Prater Testnet to practice with fake ETH, or Mainnet to stake on the real network using real ETH.",
+			Description:          "The Ethereum network you want to use - select Prater Testnet or Ropsten Testnet to practice with fake ETH, or Mainnet to stake on the real network using real ETH.",
 			Type:                 ParameterType_Choice,
 			Default:              map[Network]interface{}{Network_All: Network_Mainnet},
 			AffectsContainers:    []ContainerID{ContainerID_Api, ContainerID_Node, ContainerID_Watchtower, ContainerID_Eth1, ContainerID_Eth2, ContainerID_Validator},
@@ -145,6 +145,10 @@ func NewSmartnodeConfig(config *RocketPoolConfig) *SmartnodeConfig {
 				Name:        "Prater Testnet",
 				Description: "This is the Prater test network, using free fake ETH and free fake RPL to make fake validators.\nUse this if you want to practice running the Smartnode in a free, safe environment before moving to mainnet.",
 				Value:       Network_Prater,
+			}, {
+				Name:        "Ropsten Testnet",
+				Description: "This is the Ropsten test network, using free fake ETH and free fake RPL to make fake validators.\nUse this if you want to practice running the Smartnode in a free, safe environment before moving to mainnet.",
+				Value:       Network_Ropsten,
 			}},
 		},
 
@@ -200,16 +204,19 @@ func NewSmartnodeConfig(config *RocketPoolConfig) *SmartnodeConfig {
 		txWatchUrl: map[Network]string{
 			Network_Mainnet: "https://etherscan.io/tx",
 			Network_Prater:  "https://goerli.etherscan.io/tx",
+			Network_Ropsten: "https://ropsten.etherscan.io/tx",
 		},
 
 		stakeUrl: map[Network]string{
 			Network_Mainnet: "https://stake.rocketpool.net",
 			Network_Prater:  "https://testnet.rocketpool.net",
+			Network_Ropsten: "https://ropsten.rocketpool.net",
 		},
 
 		chainID: map[Network]uint{
 			Network_Mainnet: 1, // Mainnet
 			Network_Prater:  5, // Goerli
+			Network_Ropsten: 3, // Ropsten
 		},
 
 		walletPath: "/.rocketpool/data/wallet",
@@ -225,26 +232,31 @@ func NewSmartnodeConfig(config *RocketPoolConfig) *SmartnodeConfig {
 		storageAddress: map[Network]string{
 			Network_Mainnet: "0x1d8f8f00cfa6758d7bE78336684788Fb0ee0Fa46",
 			Network_Prater:  "0xd8Cd47263414aFEca62d6e2a3917d6600abDceB3",
+			Network_Ropsten: "0x2b43C0b8e44FD03aa5C2866ba380fBcB646A1D42",
 		},
 
 		oneInchOracleAddress: map[Network]string{
 			Network_Mainnet: "0x07D91f5fb9Bf7798734C3f606dB065549F6893bb",
 			Network_Prater:  "0x4eDC966Df24264C9C817295a0753804EcC46Dd22",
+			Network_Ropsten: "0xd46a870139f348c3d2596470c355e4be26b03071",
 		},
 
 		rplTokenAddress: map[Network]string{
 			Network_Mainnet: "0xb4efd85c19999d84251304bda99e90b92300bd93",
 			Network_Prater:  "0xb4efd85c19999d84251304bda99e90b92300bd93",
+			Network_Ropsten: "0xb4efd85c19999d84251304bda99e90b92300bd93",
 		},
 
 		rplFaucetAddress: map[Network]string{
 			Network_Mainnet: "",
 			Network_Prater:  "0x95D6b8E2106E3B30a72fC87e2B56ce15E37853F9",
+			Network_Ropsten: "0x94e840CD58FF0F387117869A28035903a51502aa",
 		},
 
 		snapshotDelegationAddress: map[Network]string{
 			Network_Mainnet: "0x469788fE6E9E9681C6ebF3bF78e7Fd26Fc015446",
 			Network_Prater:  "0xD0897D68Cd66A710dDCecDe30F7557972181BEDc",
+			Network_Ropsten: "0x2588C77829015080C771359eC1C3066d2f1158Db",
 		},
 	}
 

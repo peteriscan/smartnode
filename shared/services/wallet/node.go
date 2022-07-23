@@ -136,9 +136,9 @@ func (w *Wallet) getNodeDerivedKey(index uint) (*hdkeychain.ExtendedKey, string,
 	// Follow derivation path
 	key := w.mk
 	for i, n := range path {
-		// Use the legacy implementation for Goerli
-		// TODO: remove this if Prater ever goes away!
-		if w.chainID.Cmp(big.NewInt(5)) == 0 {
+		// Use the legacy implementation for Goerli & Ropsten
+		// TODO: remove this if Prater/Ropsten ever goes away!
+		if w.chainID.Cmp(big.NewInt(5)) == 0 || w.chainID.Cmp(big.NewInt(3)) == 0 {
 			key, err = key.DeriveNonStandard(n)
 		} else {
 			key, err = key.Derive(n)
