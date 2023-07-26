@@ -89,6 +89,8 @@ type RocketPoolConfig struct {
 	Geth              *GethConfig              `yaml:"geth,omitempty"`
 	Nethermind        *NethermindConfig        `yaml:"nethermind,omitempty"`
 	Besu              *BesuConfig              `yaml:"besu,omitempty"`
+	Erigon            *ErigonConfig            `yaml:"erigon,omitempty"`
+	Reth              *RethConfig              `yaml:"reth,omitempty"`
 	ExternalExecution *ExternalExecutionConfig `yaml:"externalExecution,omitempty"`
 
 	// Consensus client configurations
@@ -210,6 +212,14 @@ func NewRocketPoolConfig(rpDir string, isNativeMode bool) *RocketPoolConfig {
 				Name:        "Besu",
 				Description: getAugmentedEcDescription(config.ExecutionClient_Besu, "Hyperledger Besu is a robust full Ethereum protocol client. It uses a novel system called \"Bonsai Trees\" to store its chain data efficiently, which allows it to access block states from the past and does not require pruning. Besu is fully open source and written in Java."),
 				Value:       config.ExecutionClient_Besu,
+			}, {
+				Name:        "Erigon",
+				Description: getAugmentedEcDescription(config.ExecutionClient_Erigon, "This is Erigon"),
+				Value:       config.ExecutionClient_Erigon,
+			}, {
+				Name:        "Reth",
+				Description: getAugmentedEcDescription(config.ExecutionClient_Reth, "Reth by Paradigm"),
+				Value:       config.ExecutionClient_Reth,
 			}},
 		},
 
@@ -446,6 +456,8 @@ func NewRocketPoolConfig(rpDir string, isNativeMode bool) *RocketPoolConfig {
 	cfg.Geth = NewGethConfig(cfg)
 	cfg.Nethermind = NewNethermindConfig(cfg)
 	cfg.Besu = NewBesuConfig(cfg)
+	cfg.Erigon = NewErigonConfig(cfg)
+	cfg.Reth = NewRethConfig(cfg)
 	cfg.ExternalExecution = NewExternalExecutionConfig(cfg)
 	cfg.FallbackNormal = NewFallbackNormalConfig(cfg)
 	cfg.FallbackPrysm = NewFallbackPrysmConfig(cfg)
@@ -549,6 +561,8 @@ func (cfg *RocketPoolConfig) GetSubconfigs() map[string]config.Config {
 		"geth":               cfg.Geth,
 		"nethermind":         cfg.Nethermind,
 		"besu":               cfg.Besu,
+		"erigon":             cfg.Erigon,
+		"reth":               cfg.Reth,
 		"externalExecution":  cfg.ExternalExecution,
 		"consensusCommon":    cfg.ConsensusCommon,
 		"lighthouse":         cfg.Lighthouse,
@@ -619,6 +633,10 @@ func (cfg *RocketPoolConfig) GetEventLogInterval() (int, error) {
 			return cfg.Geth.EventLogInterval, nil
 		case config.ExecutionClient_Nethermind:
 			return cfg.Nethermind.EventLogInterval, nil
+		case config.ExecutionClient_Erigon:
+			return cfg.Erigon.EventLogInterval, nil
+		case config.ExecutionClient_Reth:
+			return cfg.Reth.EventLogInterval, nil
 		default:
 			return 0, fmt.Errorf("can't get event log interval of unknown execution client [%v]", client)
 		}
@@ -857,6 +875,12 @@ func (cfg *RocketPoolConfig) GenerateEnvironmentVariables() map[string]string {
 		case config.ExecutionClient_Besu:
 			config.AddParametersToEnvVars(cfg.Besu.GetParameters(), envVars)
 			envVars["EC_STOP_SIGNAL"] = besuStopSignal
+		case config.ExecutionClient_Erigon:
+			config.AddParametersToEnvVars(cfg.Erigon.GetParameters(), envVars)
+			envVars["EC_STOP_SIGNAL"] = erigonStopSignal
+		case config.ExecutionClient_Reth:
+			config.AddParametersToEnvVars(cfg.Reth.GetParameters(), envVars)
+			envVars["EC_STOP_SIGNAL"] = rethStopSignal
 		}
 	} else {
 		envVars["EC_CLIENT"] = "X" // X is for external / unknown
