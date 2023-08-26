@@ -91,6 +91,7 @@ func NewErigonConfig(cfg *RocketPoolConfig) *ErigonConfig {
 				config.Network_Mainnet: erigonTagProd,
 				config.Network_Prater:  erigonTagTest,
 				config.Network_Devnet:  erigonTagTest,
+				config.Network_Holesky: erigonTagTest,
 			},
 			AffectsContainers:    []config.ContainerID{config.ContainerID_Eth1},
 			EnvironmentVariables: []string{"EC_CONTAINER_TAG"},

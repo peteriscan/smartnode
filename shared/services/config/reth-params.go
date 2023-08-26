@@ -91,6 +91,7 @@ func NewRethConfig(cfg *RocketPoolConfig) *RethConfig {
 				config.Network_Mainnet: rethTagProd,
 				config.Network_Prater:  rethTagTest,
 				config.Network_Devnet:  rethTagTest,
+				config.Network_Holesky: rethTagTest,
 			},
 			AffectsContainers:    []config.ContainerID{config.ContainerID_Eth1},
 			EnvironmentVariables: []string{"EC_CONTAINER_TAG"},

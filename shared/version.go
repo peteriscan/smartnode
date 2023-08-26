@@ -1,6 +1,6 @@
 package shared
 
-const RocketPoolVersion string = "1.10.2-erigon-reth"
+const RocketPoolVersion string = "1.10.2-erigon-reth-holesky"
 
 const Logo string = `______           _        _    ______           _
 | ___ \         | |      | |   | ___ \         | |
