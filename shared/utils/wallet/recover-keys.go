@@ -9,7 +9,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/goccy/go-json"
-	"github.com/rocket-pool/rocketpool-go/minipool"
+// 	"github.com/rocket-pool/rocketpool-go/minipool"
 	"github.com/rocket-pool/rocketpool-go/rocketpool"
 	"github.com/rocket-pool/rocketpool-go/types"
 	"github.com/rocket-pool/smartnode/shared/services"
@@ -36,10 +36,12 @@ func RecoverMinipoolKeys(c *cli.Context, rp *rocketpool.RocketPool, address comm
 	}
 
 	// Get node's validating pubkeys
-	pubkeys, err := minipool.GetNodeValidatingMinipoolPubkeys(rp, address, nil)
-	if err != nil {
-		return nil, err
-	}
+	// holesky hack
+	// pubkeys, err := minipool.GetNodeValidatingMinipoolPubkeys(rp, address, nil)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	pubkeys := []types.ValidatorPubkey{}
 
 	// Remove zero pubkeys
 	zeroPubkey := types.ValidatorPubkey{}
@@ -156,7 +158,8 @@ func CheckForAndRecoverCustomMinipoolKeys(cfg *config.RocketPoolConfig, pubkeyMa
 				_, exists := pubkeyMap[keystore.Pubkey]
 				if !exists {
 					// This pubkey isn't for any of this node's minipools so ignore it
-					continue
+					// holesky hack
+					// continue
 				}
 
 				// Get the password for it

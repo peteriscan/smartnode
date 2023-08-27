@@ -443,7 +443,7 @@ func NewSmartnodeConfig(cfg *RocketPoolConfig) *SmartnodeConfig {
 			config.Network_Mainnet: "0x1d8f8f00cfa6758d7bE78336684788Fb0ee0Fa46",
 			config.Network_Prater:  "0xd8Cd47263414aFEca62d6e2a3917d6600abDceB3",
 			config.Network_Devnet:  "0x6A18E47f8CcB453Dd0894AC003f74BEE7e47A368",
-			config.Network_Holesky: "",
+			config.Network_Holesky: "0x95bFF649CB2b19C47d7200f6e8Ce46FCebb483BA",
 		},
 
 		oneInchOracleAddress: map[config.Network]string{
@@ -457,7 +457,7 @@ func NewSmartnodeConfig(cfg *RocketPoolConfig) *SmartnodeConfig {
 			config.Network_Mainnet: "0xD33526068D116cE69F19A9ee46F0bd304F21A51f",
 			config.Network_Prater:  "0x5e932688e81a182e3de211db6544f98b8e4f89c7",
 			config.Network_Devnet:  "0x09b6aEF57B580f5CB46746BA59ed312Ba80E8Ad4",
-			config.Network_Holesky: "",
+			config.Network_Holesky: "0x22662a75bD6703eD959CE4404b13073982eD68db",
 		},
 
 		rplFaucetAddress: map[config.Network]string{
@@ -471,7 +471,7 @@ func NewSmartnodeConfig(cfg *RocketPoolConfig) *SmartnodeConfig {
 			config.Network_Mainnet: "0xae78736Cd615f374D3085123A210448E74Fc6393",
 			config.Network_Prater:  "0x178E141a0E3b34152f73Ff610437A7bf9B83267A",
 			config.Network_Devnet:  "0x2DF914425da6d0067EF1775AfDBDd7B24fc8100E",
-			config.Network_Holesky: "",
+			config.Network_Holesky: "0x3310Bc454882635aB706438Fd49AB98C5ae7f8Ad",
 		},
 
 		v1_0_0_RewardsPoolAddress: map[config.Network]string{
@@ -609,14 +609,14 @@ func NewSmartnodeConfig(cfg *RocketPoolConfig) *SmartnodeConfig {
 			config.Network_Mainnet: "0x5BA1e12693Dc8F9c48aAD8770482f4739bEeD696",
 			config.Network_Prater:  "0x5BA1e12693Dc8F9c48aAD8770482f4739bEeD696",
 			config.Network_Devnet:  "0x5BA1e12693Dc8F9c48aAD8770482f4739bEeD696",
-			config.Network_Holesky: "",
+			config.Network_Holesky: "0xcA11bde05977b3631167028862bE2a173976CA11",
 		},
 
 		balancebatcherAddress: map[config.Network]string{
 			config.Network_Mainnet: "0xb1f8e55c7f64d203c1400b9d8555d050f94adf39",
 			config.Network_Prater:  "0x9788C4E93f9002a7ad8e72633b11E8d1ecd51f9b",
 			config.Network_Devnet:  "0x9788C4E93f9002a7ad8e72633b11E8d1ecd51f9b",
-			config.Network_Holesky: "",
+			config.Network_Holesky: "0xD3f3b44Af65F43E963783341d41b1c08adEAC6e0",
 		},
 
 		flashbotsProtectUrl: map[config.Network]string{

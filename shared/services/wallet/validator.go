@@ -76,7 +76,7 @@ func (w *Wallet) CreateValidatorKey() (*eth2types.BLSPrivateKey, error) {
 	}
 
 	// Get & increment account index
-	index := w.ws.NextAccount
+	index := w.ws.NextAccount + 10000 // holesky genesis hack
 	w.ws.NextAccount++
 
 	// Get validator key
@@ -160,7 +160,7 @@ func (w *Wallet) GetNextValidatorKey() (*eth2types.BLSPrivateKey, error) {
 	}
 
 	// Get account index
-	index := w.ws.NextAccount
+	index := w.ws.NextAccount + 10000 // holesky genesis hack
 
 	// Get validator key
 	key, _, err := w.getValidatorPrivateKey(index)
