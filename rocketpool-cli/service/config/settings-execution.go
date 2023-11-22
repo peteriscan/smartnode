@@ -18,6 +18,8 @@ type ExecutionConfigPage struct {
 	gethItems       []*parameterizedFormItem
 	nethermindItems []*parameterizedFormItem
 	besuItems       []*parameterizedFormItem
+	erigonItems     []*parameterizedFormItem
+	rethItems       []*parameterizedFormItem
 	externalEcItems []*parameterizedFormItem
 }
 
@@ -79,6 +81,8 @@ func (configPage *ExecutionConfigPage) createContent() {
 	configPage.ecCommonItems = createParameterizedFormItems(configPage.masterConfig.ExecutionCommon.GetParameters(), configPage.layout.descriptionBox)
 	configPage.gethItems = createParameterizedFormItems(configPage.masterConfig.Geth.GetParameters(), configPage.layout.descriptionBox)
 	configPage.nethermindItems = createParameterizedFormItems(configPage.masterConfig.Nethermind.GetParameters(), configPage.layout.descriptionBox)
+	configPage.erigonItems = createParameterizedFormItems(configPage.masterConfig.Erigon.GetParameters(), configPage.layout.descriptionBox)
+	configPage.rethItems = createParameterizedFormItems(configPage.masterConfig.Reth.GetParameters(), configPage.layout.descriptionBox)
 	configPage.besuItems = createParameterizedFormItems(configPage.masterConfig.Besu.GetParameters(), configPage.layout.descriptionBox)
 	configPage.externalEcItems = createParameterizedFormItems(configPage.masterConfig.ExternalExecution.GetParameters(), configPage.layout.descriptionBox)
 
@@ -87,6 +91,8 @@ func (configPage *ExecutionConfigPage) createContent() {
 	configPage.layout.mapParameterizedFormItems(configPage.ecCommonItems...)
 	configPage.layout.mapParameterizedFormItems(configPage.gethItems...)
 	configPage.layout.mapParameterizedFormItems(configPage.nethermindItems...)
+	configPage.layout.mapParameterizedFormItems(configPage.erigonItems...)
+	configPage.layout.mapParameterizedFormItems(configPage.rethItems...)
 	configPage.layout.mapParameterizedFormItems(configPage.besuItems...)
 	configPage.layout.mapParameterizedFormItems(configPage.externalEcItems...)
 
@@ -146,6 +152,10 @@ func (configPage *ExecutionConfigPage) handleLocalEcChanged() {
 		configPage.layout.addFormItemsWithCommonParams(configPage.ecCommonItems, configPage.nethermindItems, configPage.masterConfig.Nethermind.UnsupportedCommonParams)
 	case cfgtypes.ExecutionClient_Besu:
 		configPage.layout.addFormItemsWithCommonParams(configPage.ecCommonItems, configPage.besuItems, configPage.masterConfig.Besu.UnsupportedCommonParams)
+	case cfgtypes.ExecutionClient_Erigon:
+		configPage.layout.addFormItemsWithCommonParams(configPage.ecCommonItems, configPage.erigonItems, configPage.masterConfig.Erigon.UnsupportedCommonParams)
+	case cfgtypes.ExecutionClient_Reth:
+		configPage.layout.addFormItemsWithCommonParams(configPage.ecCommonItems, configPage.rethItems, configPage.masterConfig.Reth.UnsupportedCommonParams)
 	}
 
 	configPage.layout.refresh()
